@@ -1,0 +1,395 @@
+"""
+Site Builder Script for SOFTWARE DEVELOPMENT COMPANY
+Generates all 26 individual HTML pages, sitemap.xml, and IMAGE-GENERATION-GUIDE.md
+"""
+import os
+import re
+
+HEADER_TEMPLATE = """<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{meta_title}</title>
+  <meta name="description" content="{meta_desc}">
+  <meta name="keywords" content="{meta_keywords}">
+  <meta property="og:title" content="{meta_title}">
+  <meta property="og:description" content="{meta_desc}">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://demo.example.com/{filename}">
+  <link rel="canonical" href="https://demo.example.com/{filename}">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+  <!-- Site Header -->
+  <header class="site-header">
+    <div class="container header-container">
+      <a href="index.html" class="brand-link" aria-label="Software Development Company Home">
+        <!-- Minimalist Symbol-Only Software Technology Logo (Hexagonal Interconnected Nodes) -->
+        <svg class="brand-logo-svg" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#4F8CFF" />
+              <stop offset="50%" stop-color="#36D6E8" />
+              <stop offset="100%" stop-color="#9878FF" />
+            </linearGradient>
+            <filter id="logoGlow" x="-20%" y="-20%" width="140%" height="140%">
+              <feGaussianBlur stdDeviation="2" result="blur" />
+              <feComposite in="SourceGraphic" in2="blur" operator="over" />
+            </filter>
+          </defs>
+          <polygon points="20,4 34,12 34,28 20,36 6,28 6,12" stroke="url(#logoGrad)" stroke-width="2" fill="rgba(20,31,50,0.6)" filter="url(#logoGlow)"/>
+          <line x1="20" y1="4" x2="20" y2="20" stroke="#36D6E8" stroke-width="1.5" stroke-dasharray="2 2"/>
+          <line x1="34" y1="28" x2="20" y2="20" stroke="#4F8CFF" stroke-width="1.5"/>
+          <line x1="6" y1="28" x2="20" y2="20" stroke="#9878FF" stroke-width="1.5"/>
+          <circle cx="20" cy="20" r="4.5" fill="#36D6E8" filter="url(#logoGlow)"/>
+          <circle cx="20" cy="4" r="2.5" fill="#4F8CFF"/>
+          <circle cx="34" cy="12" r="2" fill="#36D6E8"/>
+          <circle cx="34" cy="28" r="2.5" fill="#4F8CFF"/>
+          <circle cx="20" cy="36" r="2" fill="#9878FF"/>
+          <circle cx="6" cy="28" r="2.5" fill="#9878FF"/>
+          <circle cx="6" cy="12" r="2" fill="#36D6E8"/>
+        </svg>
+        <div class="brand-text">
+          <span class="brand-name">SOFTWARE DEVELOPMENT COMPANY</span>
+          <span class="brand-tag">Custom Software Engineering</span>
+        </div>
+      </a>
+
+      <!-- Desktop & Responsive Navigation -->
+      <nav class="main-nav" aria-label="Main Navigation">
+        <ul class="nav-list">
+          <li class="nav-item">
+            <a href="index.html" class="nav-link">Home</a>
+          </li>
+          <li class="nav-item has-dropdown">
+            <a href="custom-software.html" class="nav-link" aria-haspopup="true">
+              Solutions
+              <svg class="nav-arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor"><path d="M2 4l4 4 4-4" stroke-width="1.5" stroke-linecap="round"/></svg>
+            </a>
+            <div class="dropdown-menu dropdown-mega">
+              <a href="custom-software.html" class="dropdown-link">
+                <svg class="dropdown-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+                <div class="dropdown-content">
+                  <span class="dropdown-title">Custom Software</span>
+                  <span class="dropdown-desc">Tailored enterprise applications</span>
+                </div>
+              </a>
+              <a href="web-applications.html" class="dropdown-link">
+                <svg class="dropdown-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                <div class="dropdown-content">
+                  <span class="dropdown-title">Web Applications</span>
+                  <span class="dropdown-desc">Portals, dashboards & workflow apps</span>
+                </div>
+              </a>
+              <a href="saas-development.html" class="dropdown-link">
+                <svg class="dropdown-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/></svg>
+                <div class="dropdown-content">
+                  <span class="dropdown-title">SaaS Development</span>
+                  <span class="dropdown-desc">Multi-tenant subscription products</span>
+                </div>
+              </a>
+              <a href="crm-development.html" class="dropdown-link">
+                <svg class="dropdown-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                <div class="dropdown-content">
+                  <span class="dropdown-title">CRM Development</span>
+                  <span class="dropdown-desc">Leads, pipelines & customer workflows</span>
+                </div>
+              </a>
+              <a href="erp-development.html" class="dropdown-link">
+                <svg class="dropdown-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+                <div class="dropdown-content">
+                  <span class="dropdown-title">ERP Development</span>
+                  <span class="dropdown-desc">Unified inventory, sales & finance</span>
+                </div>
+              </a>
+              <a href="pos-development.html" class="dropdown-link">
+                <svg class="dropdown-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><line x1="6" y1="8" x2="10" y2="8"/><line x1="14" y1="8" x2="18" y2="8"/><line x1="6" y1="12" x2="18" y2="12"/></svg>
+                <div class="dropdown-content">
+                  <span class="dropdown-title">POS & Billing</span>
+                  <span class="dropdown-desc">Retail & restaurant checkouts</span>
+                </div>
+              </a>
+              <a href="inventory-software.html" class="dropdown-link">
+                <svg class="dropdown-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+                <div class="dropdown-content">
+                  <span class="dropdown-title">Inventory Software</span>
+                  <span class="dropdown-desc">Stock tracking & warehouse nodes</span>
+                </div>
+              </a>
+              <a href="ecommerce-development.html" class="dropdown-link">
+                <svg class="dropdown-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+                <div class="dropdown-content">
+                  <span class="dropdown-title">E-commerce Development</span>
+                  <span class="dropdown-desc">Custom store platforms & checkouts</span>
+                </div>
+              </a>
+              <a href="mobile-apps.html" class="dropdown-link">
+                <svg class="dropdown-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+                <div class="dropdown-content">
+                  <span class="dropdown-title">Mobile Apps</span>
+                  <span class="dropdown-desc">iOS, Android & business clients</span>
+                </div>
+              </a>
+              <a href="business-automation.html" class="dropdown-link">
+                <svg class="dropdown-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                <div class="dropdown-content">
+                  <span class="dropdown-title">Business Automation</span>
+                  <span class="dropdown-desc">Intelligent triggers & workflow rules</span>
+                </div>
+              </a>
+              <a href="api-integration.html" class="dropdown-link">
+                <svg class="dropdown-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 11a9 9 0 0 1 9 9"/><path d="M4 4a16 16 0 0 1 16 16"/><circle cx="5" cy="19" r="1"/></svg>
+                <div class="dropdown-content">
+                  <span class="dropdown-title">API & Integrations</span>
+                  <span class="dropdown-desc">REST, Webhooks & data sync</span>
+                </div>
+              </a>
+              <a href="database-development.html" class="dropdown-link">
+                <svg class="dropdown-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+                <div class="dropdown-content">
+                  <span class="dropdown-title">Database Development</span>
+                  <span class="dropdown-desc">Relational schemas & optimization</span>
+                </div>
+              </a>
+              <a href="software-modernization.html" class="dropdown-link">
+                <svg class="dropdown-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+                <div class="dropdown-content">
+                  <span class="dropdown-title">Software Modernization</span>
+                  <span class="dropdown-desc">Legacy migration & UI re-platforming</span>
+                </div>
+              </a>
+              <a href="software-maintenance.html" class="dropdown-link">
+                <svg class="dropdown-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+                <div class="dropdown-content">
+                  <span class="dropdown-title">Maintenance & Support</span>
+                  <span class="dropdown-desc">Bug fixes, security updates & tuning</span>
+                </div>
+              </a>
+            </div>
+          </li>
+          <li class="nav-item has-dropdown">
+            <a href="portfolio.html" class="nav-link" aria-haspopup="true">
+              Our Work
+              <svg class="nav-arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor"><path d="M2 4l4 4 4-4" stroke-width="1.5" stroke-linecap="round"/></svg>
+            </a>
+            <div class="dropdown-menu">
+              <a href="portfolio.html" class="dropdown-link">
+                <svg class="dropdown-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                <div class="dropdown-content">
+                  <span class="dropdown-title">Software Portfolio</span>
+                  <span class="dropdown-desc">Demo concepts & prototypes</span>
+                </div>
+              </a>
+              <a href="case-studies.html" class="dropdown-link">
+                <svg class="dropdown-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                <div class="dropdown-content">
+                  <span class="dropdown-title">Case Studies</span>
+                  <span class="dropdown-desc">Architectural deep dives</span>
+                </div>
+              </a>
+              <a href="development-process.html" class="dropdown-link">
+                <svg class="dropdown-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                <div class="dropdown-content">
+                  <span class="dropdown-title">Development Process</span>
+                  <span class="dropdown-desc">7-step engineering lifecycle</span>
+                </div>
+              </a>
+              <a href="technologies.html" class="dropdown-link">
+                <svg class="dropdown-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+                <div class="dropdown-content">
+                  <span class="dropdown-title">Technologies & Tools</span>
+                  <span class="dropdown-desc">Our complete tech stack</span>
+                </div>
+              </a>
+              <a href="industries.html" class="dropdown-link">
+                <svg class="dropdown-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+                <div class="dropdown-content">
+                  <span class="dropdown-title">Industries We Serve</span>
+                  <span class="dropdown-desc">12 tailored business sectors</span>
+                </div>
+              </a>
+            </div>
+          </li>
+          <li class="nav-item has-dropdown">
+            <a href="about.html" class="nav-link" aria-haspopup="true">
+              Company
+              <svg class="nav-arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor"><path d="M2 4l4 4 4-4" stroke-width="1.5" stroke-linecap="round"/></svg>
+            </a>
+            <div class="dropdown-menu dropdown-right">
+              <a href="about.html" class="dropdown-link">
+                <svg class="dropdown-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                <div class="dropdown-content">
+                  <span class="dropdown-title">About the Company</span>
+                  <span class="dropdown-desc">Mission, vision & philosophy</span>
+                </div>
+              </a>
+              <a href="careers.html" class="dropdown-link">
+                <svg class="dropdown-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                <div class="dropdown-content">
+                  <span class="dropdown-title">Careers</span>
+                  <span class="dropdown-desc">Culture & 8 demo positions</span>
+                </div>
+              </a>
+              <a href="blog.html" class="dropdown-link">
+                <svg class="dropdown-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+                <div class="dropdown-content">
+                  <span class="dropdown-title">Tech Insights & Blog</span>
+                  <span class="dropdown-desc">Engineering articles & guides</span>
+                </div>
+              </a>
+              <a href="faq.html" class="dropdown-link">
+                <svg class="dropdown-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                <div class="dropdown-content">
+                  <span class="dropdown-title">FAQ</span>
+                  <span class="dropdown-desc">Frequently asked questions</span>
+                </div>
+              </a>
+              <a href="contact.html" class="dropdown-link">
+                <svg class="dropdown-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                <div class="dropdown-content">
+                  <span class="dropdown-title">Contact Us</span>
+                  <span class="dropdown-desc">Inquire about your project</span>
+                </div>
+              </a>
+            </div>
+          </li>
+        </ul>
+      </nav>
+
+      <div class="header-actions">
+        <a href="request-quote.html" class="btn btn-primary btn-sm">Request a Quote</a>
+      </div>
+
+      <button class="mobile-toggle" aria-label="Toggle navigation menu" aria-expanded="false">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+      </button>
+    </div>
+  </header>
+"""
+
+FOOTER_TEMPLATE = """
+  <!-- Global Footer -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <!-- Col 1: Brand & Tagline -->
+        <div class="footer-col footer-brand">
+          <div style="display:flex; align-items:center; gap:12px; margin-bottom:14px;">
+            <svg class="brand-logo-svg" style="width:32px; height:32px;" viewBox="0 0 40 40" fill="none">
+              <polygon points="20,4 34,12 34,28 20,36 6,28 6,12" stroke="#4F8CFF" stroke-width="2" fill="rgba(20,31,50,0.6)"/>
+              <circle cx="20" cy="20" r="4" fill="#36D6E8"/>
+            </svg>
+            <span class="brand-name" style="font-size:0.85rem;">SOFTWARE DEVELOPMENT COMPANY</span>
+          </div>
+          <p>
+            "WE TURN COMPLEX BUSINESS IDEAS INTO POWERFUL SOFTWARE."
+          </p>
+          <p style="font-size:0.8125rem; color:var(--text-muted);">
+            Specializing in designing, developing, and delivering custom software solutions, enterprise web platforms, and automated workflow architectures.
+          </p>
+          <div style="margin-top:16px;">
+            <span class="demo-disclaimer-badge">Frontend Demo Website — All Details Editable</span>
+          </div>
+        </div>
+
+        <!-- Col 2: Core Solutions -->
+        <div class="footer-col">
+          <h4>Software Solutions</h4>
+          <ul class="footer-links">
+            <li><a href="custom-software.html">Custom Software</a></li>
+            <li><a href="web-applications.html">Web Applications</a></li>
+            <li><a href="saas-development.html">SaaS Development</a></li>
+            <li><a href="crm-development.html">CRM Software</a></li>
+            <li><a href="erp-development.html">ERP Systems</a></li>
+            <li><a href="pos-development.html">POS & Billing</a></li>
+            <li><a href="inventory-software.html">Inventory Software</a></li>
+            <li><a href="ecommerce-development.html">E-commerce Platforms</a></li>
+          </ul>
+        </div>
+
+        <!-- Col 3: Architecture & Engineering -->
+        <div class="footer-col">
+          <h4>Engineering</h4>
+          <ul class="footer-links">
+            <li><a href="mobile-apps.html">Mobile Applications</a></li>
+            <li><a href="business-automation.html">Business Automation</a></li>
+            <li><a href="api-integration.html">API & Integrations</a></li>
+            <li><a href="database-development.html">Database Design</a></li>
+            <li><a href="software-modernization.html">Modernization</a></li>
+            <li><a href="software-maintenance.html">Maintenance & Support</a></li>
+            <li><a href="development-process.html">Development Process</a></li>
+            <li><a href="technologies.html">Technologies Directory</a></li>
+          </ul>
+        </div>
+
+        <!-- Col 4: Corporate & Case Studies -->
+        <div class="footer-col">
+          <h4>Company & Work</h4>
+          <ul class="footer-links">
+            <li><a href="about.html">About Company</a></li>
+            <li><a href="industries.html">Industries We Serve</a></li>
+            <li><a href="portfolio.html">Software Portfolio</a></li>
+            <li><a href="case-studies.html">Case Studies</a></li>
+            <li><a href="careers.html">Careers (Demo)</a></li>
+            <li><a href="blog.html">Software Insights</a></li>
+            <li><a href="faq.html">FAQ</a></li>
+            <li><a href="request-quote.html">Request a Quote</a></li>
+          </ul>
+        </div>
+
+        <!-- Col 5: Contact Placeholders -->
+        <div class="footer-col">
+          <h4>Demo Contact</h4>
+          <ul class="footer-links" style="font-size:0.8125rem;">
+            <li><strong>Phone:</strong> 0000000000</li>
+            <li><strong>Alt Phone:</strong> 0000000000</li>
+            <li><strong>Email:</strong> demo@example.com</li>
+            <li><strong>Address:</strong> Plot No. 000, Demo Road, Sample Area, Hyderabad, Telangana – 000000.</li>
+            <li style="margin-top:8px;"><strong>Hours:</strong></li>
+            <li>Mon – Fri: 9:00 AM – 6:00 PM</li>
+            <li>Sat: 10:00 AM – 2:00 PM</li>
+            <li>Sun: Closed</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <div>
+          &copy; 2026 SOFTWARE DEVELOPMENT COMPANY. All rights reserved. Built with HTML5, CSS3 & Vanilla JavaScript.
+        </div>
+        <div style="display:flex; gap:16px;">
+          <a href="about.html" style="color:var(--text-muted);">Engineering Standards</a>
+          <a href="faq.html" style="color:var(--text-muted);">Project FAQ</a>
+          <a href="contact.html" style="color:var(--text-muted);">Contact</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Back to Top Button -->
+  <button class="back-to-top" aria-label="Back to top">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="18 15 12 9 6 15"/></svg>
+  </button>
+
+  <!-- Interactive JavaScript Engine -->
+  <script src="assets/js/main.js"></script>
+</body>
+</html>
+"""
+
+def create_img_placeholder(filename, ratio, desc, extra_classes=""):
+    base_name = os.path.splitext(filename)[0]
+    img_src = f"images/{base_name}.jpeg"
+    ratio_class = f"aspect-{ratio.replace(':', '-')}"
+    is_hero = "hero" in filename
+    loading_attr = 'loading="eager"' if is_hero else 'loading="lazy"'
+    
+    return f"""
+    <div class="img-container {ratio_class} {extra_classes}">
+      <img src="{img_src}" alt="{desc}" class="responsive-img" width="1376" height="768" {loading_attr} onerror="this.onerror=null; this.src='assets/images/{base_name}.jpeg';">
+    </div>
+    """
+
+print("Generator template defined successfully.")
